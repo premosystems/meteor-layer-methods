@@ -15,6 +15,9 @@ Meteor.methods ({
 
     var https = Npm.require ('https');
 
+    //console.log('LayerApi.cert: ' + JSON.stringify(LayerApi.cert));
+    //console.log('LayerApi.key: ' + JSON.stringify(LayerApi.key));
+
     var options = {
       host: 'api-beta.layer.com',
       port: 443,
@@ -34,7 +37,7 @@ Meteor.methods ({
 
     var fut = new Future ();
 
-    console.log ('/app/layer/createUser request: ' + JSON.stringify (options));
+    //console.log ('/app/layer/createUser request: ' + JSON.stringify (options));
 
     var req = https.request (options,
       Meteor.bindEnvironment (
@@ -46,22 +49,23 @@ Meteor.methods ({
           res.on ('data', Meteor.bindEnvironment (
               function (responseData) {
 
+                console.log ('responseData: ' + JSON.stringify (responseData));
                 var result = JSON.parse (responseData);
 
-                console.log ('responseData: ' + JSON.stringify (result));
+
 
                 if (result.status == true) { // If we were successful, let's update the user
                   // Update the user Id
                   var layer_id = result.users[0].layer_id;
                   var remote_id = result.users[0].remote_id;
 
-                  Meteor.users.update ({_id: userId}, {$set: {'services.layer.layer_id': layer_id,'services.layer.remote_id': remote_id}});
+                  Meteor.users.update ({_id: userId}, {$set: {'services.layer.layer_id': layer_id, 'services.layer.remote_id': remote_id}});
                 }
                 fut.return (result);
               }
               , function (ex) {
-                console.log (requestUrl + ' error: ' + JSON.stringify (ex));
-                throw ex;
+                console.log ('options: ' + JSON.stringify (options) + '  / error: ' + JSON.stringify (ex));
+                //throw ex;
               })
           );
 
